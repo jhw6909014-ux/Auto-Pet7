@@ -11,40 +11,41 @@ from email.mime.text import MIMEText
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
-BLOGGER_EMAIL = os.environ.get("BLOGGER_EMAIL") # ⚠️ 確認是寵物部落格信箱
+BLOGGER_EMAIL = os.environ.get("BLOGGER_EMAIL") # ⚠️ 記得確認這是「萌寵部落格」的信箱
 
 # ================= 2. 【賺錢核心】寵物用品蝦皮連結 =================
-# 請將下方的提示，換成你轉換好的「短網址」
+# 我已經把你給的 5 個連結分配好類別了
 SHOPEE_LINKS = {
-    # 1. 預設：寵物館首頁
-    "default": "https://s.shopee.tw/請填入寵物首頁連結", 
+    # 1. 預設：寵物館首頁 (當沒對到關鍵字時用這個)
+    "default": "https://s.shopee.tw/1qUmD7Hdfp", 
     
     # 2. 貓主子專區 (貓砂、罐頭是剛需)
-    "cat": "https://s.shopee.tw/請填入貓砂連結",
-    "kitten": "https://s.shopee.tw/請填入貓罐頭連結",
-    "meow": "https://s.shopee.tw/請填入貓抓板連結",
+    "cat": "https://s.shopee.tw/1LYVcCJXgk",
+    "kitten": "https://s.shopee.tw/1LYVcCJXgk",
+    "meow": "https://s.shopee.tw/1LYVcCJXgk", # 喵
     
     # 3. 狗寶貝專區
-    "dog": "https://s.shopee.tw/請填入狗飼料連結",
-    "puppy": "https://s.shopee.tw/請填入狗零食連結",
-    "bark": "https://s.shopee.tw/請填入狗玩具連結",
+    "dog": "https://s.shopee.tw/1VrvoVIuLn",
+    "puppy": "https://s.shopee.tw/1VrvoVIuLn",
+    "bark": "https://s.shopee.tw/1VrvoVIuLn", # 汪
     
-    # 4. 通用飼料與零食
-    "food": "https://s.shopee.tw/請填入寵物零食連結",
-    "treat": "https://s.shopee.tw/請填入肉泥連結",
-    "eat": "https://s.shopee.tw/請填入飼料連結",
+    # 4. 通用飼料與零食 (肉泥、點心)
+    "food": "https://s.shopee.tw/10vfDaKoMi",
+    "treat": "https://s.shopee.tw/10vfDaKoMi",
+    "eat": "https://s.shopee.tw/10vfDaKoMi",
     
-    # 5. 玩具與用品
-    "toy": "https://s.shopee.tw/請填入寵物玩具連結",
-    "play": "https://s.shopee.tw/請填入寵物玩具連結",
-    "pet": "https://s.shopee.tw/請填入寵物用品連結"
+    # 5. 玩具與用品 (抓板、睡窩)
+    "toy": "https://s.shopee.tw/1BF5PtKB1l",
+    "play": "https://s.shopee.tw/1BF5PtKB1l",
+    "pet": "https://s.shopee.tw/1BF5PtKB1l"
 }
 
-# ================= 3. AI 設定 =================
+# ================= 3. AI 設定 (自動偵測可用模型) =================
 genai.configure(api_key=GOOGLE_API_KEY)
 
 def get_valid_model():
     try:
+        # 自動尋找你的 API Key 能用的模型，避免 404
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
                 if 'gemini' in m.name:
@@ -54,7 +55,7 @@ def get_valid_model():
         return None
 
 model = get_valid_model()
-# 新聞來源：The Dodo (全球最暖心的寵物媒體，素材很多)
+# 新聞來源：The Dodo (全球最暖心的寵物媒體)
 RSS_URL = "https://www.thedodo.com/feed"
 
 # ================= 4. 萌寵風格圖片生成 =================
@@ -63,7 +64,7 @@ def get_pet_image(title):
     生成「超可愛寵物風格」的圖片
     關鍵字：毛茸茸、大眼睛、特寫、高畫質、溫暖
     """
-    magic_prompt = f"{title}, cute fluffy animals, close up shot, adorable, highly detailed, 8k resolution, cinematic lighting, warm atmosphere"
+    magic_prompt = f"{title}, cute fluffy animals, close up shot, adorable eyes, highly detailed, 8k resolution, cinematic lighting, warm atmosphere"
     safe_prompt = urllib.parse.quote(magic_prompt)
     seed = int(time.time())
     img_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=600&nologo=true&seed={seed}&model=flux"
@@ -92,7 +93,7 @@ def ai_process_article(title, summary, shopee_link):
     
     【要求】
     1. **分類標籤**：請判斷類別（例如：喵星人日記、汪星人日常、毛孩健康、寵物趣聞）。
-    2. **內文撰寫**：分成三段，語氣要活潑、可愛、充滿愛心，像是在分享自家寵物的故事。
+    2. **內文撰寫**：分成三段，語氣要活潑、可愛、充滿愛心，像是在分享自家毛孩的故事。
     3. **推銷植入**：文末加入按鈕。
     
     【回傳格式 (JSON)】：
@@ -116,6 +117,7 @@ def ai_process_article(title, summary, shopee_link):
         
     except Exception as e:
         print(f"❌ AI 處理失敗: {e}")
+        # 備用方案
         return "寵物快訊", f"<p>{summary}</p><br><div style='text-align:center'><a href='{shopee_link}'>點此查看詳情</a></div>"
 
 # ================= 7. 寄信 =================
@@ -124,6 +126,7 @@ def send_email(subject, category, body_html):
     msg['From'] = GMAIL_USER
     msg['To'] = BLOGGER_EMAIL
     
+    # 標題加入 #標籤
     msg['Subject'] = f"{subject} #{category}"
     msg.attach(MIMEText(body_html, 'html'))
 
@@ -149,8 +152,13 @@ if __name__ == "__main__":
         entry = feed.entries[0]
         print(f"📄 處理文章：{entry.title}")
         
+        # 1. 選連結
         my_link = get_best_link(entry.title, getattr(entry, 'summary', ''))
+        
+        # 2. 產圖
         img_html = get_pet_image(entry.title)
+        
+        # 3. 寫文
         category, text_html = ai_process_article(entry.title, getattr(entry, 'summary', ''), my_link)
         
         if text_html:
