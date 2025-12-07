@@ -2,7 +2,7 @@ name: Auto Money Bot
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # 每 4 小時一篇
+    - cron: '10 */4 * * *' # 每 4 小時一篇
   workflow_dispatch:
 
 jobs:
