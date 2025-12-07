@@ -11,41 +11,30 @@ from email.mime.text import MIMEText
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
-BLOGGER_EMAIL = os.environ.get("BLOGGER_EMAIL") # ⚠️ 記得確認這是「萌寵部落格」的信箱
+BLOGGER_EMAIL = os.environ.get("BLOGGER_EMAIL") 
 
 # ================= 2. 【賺錢核心】寵物用品蝦皮連結 =================
-# 我已經把你給的 5 個連結分配好類別了
 SHOPEE_LINKS = {
-    # 1. 預設：寵物館首頁 (當沒對到關鍵字時用這個)
     "default": "https://s.shopee.tw/1qUmD7Hdfp", 
-    
-    # 2. 貓主子專區 (貓砂、罐頭是剛需)
     "cat": "https://s.shopee.tw/1LYVcCJXgk",
     "kitten": "https://s.shopee.tw/1LYVcCJXgk",
-    "meow": "https://s.shopee.tw/1LYVcCJXgk", # 喵
-    
-    # 3. 狗寶貝專區
+    "meow": "https://s.shopee.tw/1LYVcCJXgk", 
     "dog": "https://s.shopee.tw/1VrvoVIuLn",
     "puppy": "https://s.shopee.tw/1VrvoVIuLn",
-    "bark": "https://s.shopee.tw/1VrvoVIuLn", # 汪
-    
-    # 4. 通用飼料與零食 (肉泥、點心)
+    "bark": "https://s.shopee.tw/1VrvoVIuLn",
     "food": "https://s.shopee.tw/10vfDaKoMi",
     "treat": "https://s.shopee.tw/10vfDaKoMi",
     "eat": "https://s.shopee.tw/10vfDaKoMi",
-    
-    # 5. 玩具與用品 (抓板、睡窩)
     "toy": "https://s.shopee.tw/1BF5PtKB1l",
     "play": "https://s.shopee.tw/1BF5PtKB1l",
     "pet": "https://s.shopee.tw/1BF5PtKB1l"
 }
 
-# ================= 3. AI 設定 (自動偵測可用模型) =================
+# ================= 3. AI 設定 =================
 genai.configure(api_key=GOOGLE_API_KEY)
 
 def get_valid_model():
     try:
-        # 自動尋找你的 API Key 能用的模型，避免 404
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
                 if 'gemini' in m.name:
@@ -55,20 +44,16 @@ def get_valid_model():
         return None
 
 model = get_valid_model()
-# 新聞來源：The Dodo (全球最暖心的寵物媒體)
-RSS_URL = "https://www.thedodo.com/feed"
+
+# 🔥 修改重點：換成 Google News RSS (寵物關鍵字)
+RSS_URL = "https://news.google.com/rss/search?q=pet+care+cute+animals&hl=en-US&gl=US&ceid=US:en"
 
 # ================= 4. 萌寵風格圖片生成 =================
 def get_pet_image(title):
-    """
-    生成「超可愛寵物風格」的圖片
-    關鍵字：毛茸茸、大眼睛、特寫、高畫質、溫暖
-    """
     magic_prompt = f"{title}, cute fluffy animals, close up shot, adorable eyes, highly detailed, 8k resolution, cinematic lighting, warm atmosphere"
     safe_prompt = urllib.parse.quote(magic_prompt)
     seed = int(time.time())
     img_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=600&nologo=true&seed={seed}&model=flux"
-    
     return f'<div style="text-align:center; margin-bottom:20px;"><img src="{img_url}" style="width:100%; max-width:800px; border-radius:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></div>'
 
 # ================= 5. 智慧選連結 =================
@@ -80,7 +65,7 @@ def get_best_link(title, content):
             return link
     return SHOPEE_LINKS["default"]
 
-# ================= 6. AI 寫作 (寵物日記風格) =================
+# ================= 6. AI 寫作 =================
 def ai_process_article(title, summary, shopee_link):
     if not model: return None, None
     print(f"🤖 AI 正在撰寫寵物文章：{title}...")
@@ -108,16 +93,13 @@ def ai_process_article(title, summary, shopee_link):
     try:
         response = model.generate_content(prompt)
         raw_text = response.text.replace("```json", "").replace("```", "").strip()
-        
         import json
         start = raw_text.find('{')
         end = raw_text.rfind('}') + 1
         data = json.loads(raw_text[start:end])
         return data.get("category", "寵物日記"), data.get("html_body", "")
-        
     except Exception as e:
         print(f"❌ AI 處理失敗: {e}")
-        # 備用方案
         return "寵物快訊", f"<p>{summary}</p><br><div style='text-align:center'><a href='{shopee_link}'>點此查看詳情</a></div>"
 
 # ================= 7. 寄信 =================
@@ -125,8 +107,6 @@ def send_email(subject, category, body_html):
     msg = MIMEMultipart()
     msg['From'] = GMAIL_USER
     msg['To'] = BLOGGER_EMAIL
-    
-    # 標題加入 #標籤
     msg['Subject'] = f"{subject} #{category}"
     msg.attach(MIMEText(body_html, 'html'))
 
@@ -142,27 +122,17 @@ def send_email(subject, category, body_html):
 # ================= 8. 主程式 =================
 if __name__ == "__main__":
     print(">>> 系統啟動 (4號店：萌寵天地版)...")
-    
     if not GMAIL_APP_PASSWORD or not model:
-        print("❌ 錯誤：請檢查 Secrets 設定")
         exit(1)
 
     feed = feedparser.parse(RSS_URL)
     if feed.entries:
         entry = feed.entries[0]
         print(f"📄 處理文章：{entry.title}")
-        
-        # 1. 選連結
         my_link = get_best_link(entry.title, getattr(entry, 'summary', ''))
-        
-        # 2. 產圖
         img_html = get_pet_image(entry.title)
-        
-        # 3. 寫文
         category, text_html = ai_process_article(entry.title, getattr(entry, 'summary', ''), my_link)
-        
         if text_html:
-            final_html = img_html + text_html
-            send_email(entry.title, category, final_html)
+            send_email(entry.title, category, img_html + text_html)
     else:
-        print("📭 無新文章")
+        print("📭 無新文章 (請檢查 RSS)")
