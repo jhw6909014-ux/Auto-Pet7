@@ -1,0 +1,30 @@
+name: Auto-Pet7
+on:
+  schedule:
+    - cron: '43 */4 * * *'
+  workflow_dispatch:
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.11' }
+      - run: pip install -U feedparser google-generativeai
+      
+      - env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python bot_code.txt
+        
+      # V23 FORCE SAVE LOGIC
+      - run: |
+          git config --global user.name "V26 Bot"
+          git config --global user.email "bot@v26"
+          git add history.txt
+          git commit -m "Log Update" || echo "No changes"
+          git push
