@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 # [CONFIG]
 RSS_KEYWORD = "pet health OR dog cat food"
 BLOGGER_EMAIL = "jhw6909017.Auto-Pet7@blogger.com"
-AFFILIATE_MAP = {"default":"https://s.shopee.tw/4Asl96iTGE","cat food":"https://s.shopee.tw/6KxFj7915I","can":"https://s.shopee.tw/6KxFj7915I","ciao":"https://s.shopee.tw/6KxFj7915I","litter":"https://s.shopee.tw/1LYZlwf7Zp","toy":"https://s.shopee.tw/1LYZlwf7Zp","scratcher":"https://s.shopee.tw/1LYZlwf7Zp","dog food":"https://s.shopee.tw/4LCBLTXu1C","jerky":"https://s.shopee.tw/4LCBLTXu1C","leash":"https://s.shopee.tw/1gBQAaz6zB","bed":"https://s.shopee.tw/1gBQAaz6zB","harness":"https://s.shopee.tw/1gBQAaz6zB"}
+AFFILIATE_MAP = {"default":"https://s.shopee.tw/9AHU0Nz1lK","cat food":"https://s.shopee.tw/5fhbpzFOTb","can":"https://s.shopee.tw/5fhbpzFOTb","ciao":"https://s.shopee.tw/5fhbpzFOTb","litter":"https://s.shopee.tw/1BFCTtJHXJ","toy":"https://s.shopee.tw/1BFCTtJHXJ","scratcher":"https://s.shopee.tw/1BFCTtJHXJ","dog food":"https://s.shopee.tw/2B7jfkjwCW","jerky":"https://s.shopee.tw/2B7jfkjwCW","leash":"https://s.shopee.tw/AKTROpQqOA","bed":"https://s.shopee.tw/AKTROpQqOA","harness":"https://s.shopee.tw/AKTROpQqOA"}
 HISTORY_FILE = "history.txt"
 STYLES = ["資深鏟屎官","獸醫助理"]
 
